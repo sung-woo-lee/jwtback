@@ -11,7 +11,7 @@ app.use(bodyParser.json());
 app.use(cors());
 
 const jwtKey = "MY_SECRET_JWT_KEY";
-const jwtExpiry = 60;
+const jwtExpiry = 6000;
 
 const path = require("path");
 
@@ -33,10 +33,16 @@ const logIn = (req, res) => {
       .json("Login failed. Please check username & password");
   }
 
-  const token = jwt.sign({ username }, jwtKey, {
-    algorithm: "HS256",
-    expiresIn: jwtExpiry,
-  });
+  const token = jwt.sign(
+    {
+      username,
+    },
+    jwtKey,
+    {
+      algorithm: "HS256",
+      expiresIn: jwtExpiry,
+    }
+  );
 
   console.log("token: ", token);
 
@@ -46,8 +52,6 @@ const logIn = (req, res) => {
       password,
       token: {
         token,
-        issuedOn: Date.now(),
-        maxAge: jwtExpiry * 1000,
       },
     },
     message: "Login successful! Redirecting now.",
