@@ -28,9 +28,11 @@ const logIn = (req, res) => {
     // return 401 error is username or password doesn't exist, or if password does
     // not match the password in our records
     console.log("bad login attempt");
-    return res
-      .status(400)
-      .json("Login failed. Please check username & password");
+    return res.status(400).json({
+      ok: false,
+      status: 400,
+      message: "Login failed. Please check username & password",
+    });
   }
 
   const token = jwt.sign(
@@ -44,15 +46,11 @@ const logIn = (req, res) => {
     }
   );
 
-  console.log("token: ", token);
-
   res.status(201).json({
+    ok: true,
     data: {
       username,
-      password,
-      token: {
-        token,
-      },
+      token,
     },
     message: "Login successful! Redirecting now.",
   });
