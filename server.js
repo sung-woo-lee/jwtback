@@ -7,13 +7,32 @@ const jwt = require("jsonwebtoken");
 
 const app = express();
 
-app.use(bodyParser.json());
 app.use(cors());
+
+// app.use((req, res, next) => {
+//   console.log("================================================");
+//   console.log("this is the check requests middleware");
+
+//   let data = "";
+//   req.on("data", (chunk) => {
+//     data += chunk;
+//   });
+//   req.on("end", () => {
+//     JSON.parse(data);
+//   });
+//   console.log("this is the body now:" + data);
+//   console.log("================================================");
+//   next();
+// });
+
+app.use(bodyParser.json());
 
 const jwtKey = "MY_SECRET_JWT_KEY";
 const jwtExpiry = 6000;
 
 const path = require("path");
+const { request } = require("https");
+const { setupMaster } = require("cluster");
 
 const users = {
   user1: "password1",
@@ -56,6 +75,28 @@ const logIn = (req, res) => {
   });
 };
 
+const checkAuth = async (req, res) => {
+  console.log(" got post request to check auth token");
+
+  const { token } = req.body;
+
+  try {
+    console.log("here's the token!" + token);
+    const decoded = jwt.verify(token, jwtKey);
+    console.log(decoded);
+
+    res.status(200).json({
+      user: decoded.username,
+    });
+  } catch (err) {
+    console.log(err);
+
+    res.status(500).json({
+      message: "Error, your JWT has expired!",
+    });
+  }
+};
+
 app.get("/api/login", (req, res) => {
   console.log("get request received!");
   res.status(200).json("You did send a get a request!");
@@ -70,6 +111,7 @@ app.post(
   // }
 );
 
+app.post("/api/checkAuth", (req, res) => checkAuth(req, res));
 app.use("/", (req, res) => {
   res.status(200).send("<h1>HELLO!</h1>");
 });
